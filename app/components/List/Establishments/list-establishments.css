@@ -1,0 +1,68 @@
+.online {
+    background-color: #59c261 !important;
+    color: #fff !important;
+
+}
+
+.online svg {
+    color: #fff !important;
+
+}
+
+.offline {
+
+    background-color: #ccc !important;
+
+}
+
+.add-to-favorite {
+    color: red;
+}
+
+.add-to-outline {
+    color: #ddd;
+}
+
+/* .account-counter {
+    color: #f00 !important;
+}
+
+.account-counter .red {
+
+    color: #fd1c00 !important;
+
+}
+
+.account-counter .orange {
+    color: #FF7F50 !important;
+}
+
+.account-counter .green {
+    color: #00FF00 !important;
+} */
+
+.red-bg {
+    /* background-color: #a91e0c !important; */
+    color: #f44336 !important;
+    font-size: 30px  !important; 
+    margin-left: 20px  !important;
+}
+
+.orange-bg {
+    /* background-color: #FF7F50 !important; */
+    color: #ff9800 !important;
+    font-size: 30px  !important; 
+    margin-left: 20px  !important;
+
+}
+
+.green-bg {
+    /* background-color: #00FF00 !important; */
+    color: #4caf50 !important;
+    font-size: 30px  !important; 
+    margin-left: 20px  !important;
+}
+
+.list-details-time {
+    color: #ff9800;
+}

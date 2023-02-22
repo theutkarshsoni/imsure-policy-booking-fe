@@ -1,0 +1,60 @@
+.primary-button{
+    width: 90%;
+    margin-left: 5%;
+    background: #266CC2;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: none;
+    outline: none;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.dashboard_table_data{
+    text-align: center;
+    border: 1px solid #e2e2e2;
+}
+
+.back-btn {
+    border: 1px solid #266CC2;
+    width: 200px;
+    background: #fff;
+    color: #266CC2;
+}
+
+
+
+
+
+
+
+
+
+
+
+.claim-switch {
+    margin-top: 20px;
+  }
+  
+  .claim-unchecked-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 12px;
+    color: white;
+    padding-right: 2px;
+  }
+  
+  .claim-checked-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    font-size: 12px;
+    color: white;
+    padding-left: 2px;
+  }

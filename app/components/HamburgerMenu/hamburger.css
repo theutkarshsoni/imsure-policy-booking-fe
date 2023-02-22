@@ -1,0 +1,51 @@
+.sidenav-link {
+  text-decoration: none !important;
+  color: #000000 !important; 
+}
+.active .sidenav-item .sidenav-text span{
+  /* background-color: #eaeaea !important; */
+  color: #307FE2;
+  font-weight: 600;
+}
+
+.active .sidenav-item .sidenav-icon img {
+  filter: invert(.5) sepia(1) saturate(75) hue-rotate(213deg);
+}
+
+.drawer-name{
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin: 5px 0px;
+}
+
+.drawer-mobile{
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin: 5px 0px;
+  color:rgba(0, 0, 0, 0.4);
+}
+
+.divider{
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  width: 90%;
+}
+
+.sidenav-icon {
+  float: left;
+}
+
+.sidenav-text {
+  float: left;
+  font-size: 16px;
+}
+
+/* .shop-setting{
+  border-bottom: 1px solid #ccc !important;
+}
+
+.shop-qr{
+  border-bottom: 1px solid #ccc !important;
+} */
+

@@ -1,0 +1,8 @@
+.network-error{
+    background-color: #CC0001;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    padding: 5px;
+}

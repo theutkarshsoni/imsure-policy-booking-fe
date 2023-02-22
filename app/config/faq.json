@@ -1,0 +1,73 @@
+[
+    {
+        "category": "A Guide to Qzap",
+        "content": [
+            {
+                "question": "How does Qzap work?",
+                "answer": "<p>Qzap is a technology platform. Qzap smartphone app connects Service Providers and Customers. Service Providers use Qzap app to allow Customers to plan and time visits to the premises of Service Providers in a calibrated manner by enabling an online queueing system. Qzap ensures the place of priority in the queue for a Customer without their physical presence at the Service Provider’s location. </p> <p> Service Provider upon successfully completing sign-up process and setting up their shop/establishment on Qzap app, a Customer can see the present size of queue for visiting the premises of Service Provider. Customer uses Qzap app to request a visit to Service Provider’s premises. Customer enters the queue and a unique token is created for such Customer. </p> <p> Customer is informed of the time for their turn with a countdown clock in red colour, on a real-time basis. Customer can make optimal use of this information and plan their journey to Service Provider’s premises accordingly. </p> <p> Upon completion of the countdown, the timer screen on Qzap app turns amber and Customer is prompted to scan the unique QR code displayed at the premises of Service Provider. Upon confirmation of their turn, the screen turns green and an animation is triggered. </p> <p> Customer displays this screen to Service Provider to validate their place of priority for accessing the Service Provider’s premises and proceed to conduct their transaction, in a safe and convenient manner. </p> <p> Learn more about how Qzap works by exploring other Help Centre topics. You can search for specific questions and answers too. </p>"
+            },
+            {
+                "question": "How is Qzap relevant and how do I benefit from using it?",
+                "answer": "<p>A new normal has been visited upon humankind by COVID-19. Faced with an invisible enemy, every person needs to protect themselves and those around them by practicing social distancing amongst other measures. Qzap app is a technology platform that offers its users the following benefits: </p> <p> 1) Maintain safe physical distancing at public places, </p> <p> 2) Efficient time management without wasted waiting times, </p> <p> 3) Compliance with social distancing regulations, </p> <p> 4) Enable a secure transaction experience at zero charge to users. </p>"
+            },
+            {
+                "question": "Who is a Service Provider?",
+                "answer": "<p>Any person or entity, whether a commercial establishment or an office or professional service or government agency or a place of worship or a public place, which receives visitors at their premises can sign-up and use Qzap app as a Service Provider. Upon opening Qzap app, a user is prompted to choose their nature of use of Qzap app, whether as a Service Provider or as a Customer. A Service Provider has a unique signing-up process on Qzap app. A Service Provider can make use of Qzap app as a Customer to visit the premises of other Service Providers.</p>"
+            },
+            {
+                "question": "Who is a Customer?",
+                "answer": "<p>Any person who visits the physical premises of a Service Provider is a Customer. Upon opening Qzap app, a user is prompted to choose their nature of use of Qzap app, whether as a Service Provider or as a Customer. A user can utilise Qzap app both as a Customer and as a Service Provider by making the switch appropriately.</p>"
+            }
+        ]
+    },
+    {
+        "category": "Signing Up",
+        "content": [
+            {
+                "question": "How do I sign up as a Service Provider?",
+                "answer": "<p>Download and install Qzap app from Google Play Store (for Android) or Apple App Store (for iOS). Authenticate your phone number by generating and entering OTP (via SMS). After accepting terms of service and privacy policy on Notice and Disclaimer screen, choose “I am a Service Provider” on the next screen. </p> <p> <strong></strong> </p> <p> Press Menu icon at top left hand corner of screen. From the dropdown list, press on “My Shop Settings.” Follow the instructions and fill in all the required information. Upon successful sign up, a unique QR code is generated. You are required to print this QR code and display it prominently just outside the entrance to your premises. </p> <p> Please ensure you are authorised to sign-up, as a Service Provider on Qzap, on behalf of your entity. A detailed video explainer in different languages is available on Qzap app to inform your journey as a Service Provider with Qzap. </p>"
+            },
+            {
+                "question": "How do I sign up as a Customer?",
+                "answer": "<p>Download and install Qzap app from Google Play Store (for Android) or Apple App Store (for iOS). Authenticate your phone number by generating and entering OTP (via SMS). After accepting terms of service and privacy policy on Notice and Disclaimer screen, choose “I am a Customer” on the next screen.</p>"
+            },
+            {
+                "question": "I am under the age of 18 years, can I sign up on Qzap?",
+                "answer": "<p>In order to use Qzap, you must be at least 18 years of age.</p>"
+            },
+            {
+                "question": "I need help for signing up on Qzap?",
+                "answer": "<p>We are here to help you with questions about signing up on Qzap, whether as a Service Provider or a Customer. If you are having trouble, first make sure that you have upgraded to the latest version of Qzap app. Let us know about any other issues you are having with signing up by contacting us at <a href=\"mailto:contact@qzap.app\">contact@qzap.app</a> </p>"
+            }
+        ]
+    },
+    {
+        "category": "Legal, privacy and other inquiries",
+        "content": [
+            {
+                "question": "What are the Qzap Community Guidelines?",
+                "answer": "<p>We want<strong> </strong>Qzap to safe and effective for everyone. Towards this end, our guidelines are given below: </p> <p> 1) Follow the law: At all times, please abide by all prevailing laws and regulations, including those on social distancing, lockdown / containment, travel restrictions, operating hours restrictions and restrictions on activities. </p> <p> 2) Help keep everyone safe: At all times, ensure you are maintaining two meters distance from other individuals and that you are protecting yourself with the usage of masks, face shields, sanitisers, temperature checks, etc. </p> <p> Respect other users of Qzap: At all times, follow the instructions of Qzap and act upon the Qzap app prompts diligently. As a Customer, make sure to be present on time when your turn arrives. As a Service Provider, honour the order of priority in the Qzap online queue system. In these challenging times, Qzap app strives to ensure a smooth, well organised visits for you and its success depends on your adherence to the system in place. Make Qzap work to get things done safely and efficiently. </p>"
+            },
+            {
+                "question": "How do I access Qzap Terms of Service?",
+                "answer": "<p>Please visit the link below to access the last updated version of Qzap Terms of Service. Alternatively, access the same from the Menu button on Qzap app.</p>"
+            },
+            {
+                "question": "How do I access Qzap Privacy Policy?",
+                "answer": "<p>Please visit the link below to access the last updated version of Qzap Privacy Policy. Alternatively, access the same from the Menu button on Qzap app.</p>"
+            },
+            {
+                "question": "What permissions does Qzap require?",
+                "answer": "<p>After you download and open Qzap app, your mobile device will notify you when the app requests various permissions. Granting the Qzap app this access supports the functioning of the Qzap app. Qzap app may not be able function / serve its purpose without some of the permissions, in which case, the user is informed accordingly.</p>"
+            },
+            {
+                "question": "How does Qzap use location information?",
+                "answer": "<p>Location data is necessary and critical for the functioning of Qzap app. Qzap uses the location information of a Service Provider to inform a Customer as to the location of the Service Provider’s premises and the distance between them, and where applicable, inform each as to the location of the other. Location information will also be collected for conducting revenue generating activities for Qzap, developing and refining Qzap algorithms & services and providing user support.</p>"
+            },
+            {
+                "question": "How do I submit an inquiry to Qzap?",
+                "answer": "<p>Please send your query with all relevant details to <a href=\"mailto:contact@qzap.app\">contact@qzap.app</a></p>"
+            }
+        ]
+    }
+]

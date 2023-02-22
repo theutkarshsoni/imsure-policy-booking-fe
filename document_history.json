@@ -1,0 +1,70 @@
+
+
+documentHistory: [{
+	edited_by: "a@imsure.in",
+	edited_on: 2021-03-17,
+	status_before: "drafted",
+	status_after: "drafted",
+	diff: "To be populated later"
+	},
+	{
+
+	}
+]
+
+
+
+[
+    {
+      name: "Bajaj Alliance General Insurance company",
+      products: [
+        {
+          name: "Arogya Sanjeevani",
+          UIN: "ABUGJ3SH4S4D",
+        },
+        {
+          name: "Health Guard",
+          UIN: "JDHFJFDFDSFF",
+        },
+        {
+          name: "Health Infinity",
+          UIN: "DHFHHSDHFJDF",
+        },
+      ],
+      tpa: [{ _id: object("3942kjs")}, 
+	}   
+    },
+    {
+      name: "Royal sundaram General Insurance",
+      products: [
+        {
+          name: "Lifeline",
+          UIN: "DSHFDSHFHDJH",
+        },
+        {
+          name: "Family Plus",
+          UIN: "DSFJDSJFJDFF",
+        },
+      ]
+    },
+    {
+      name: "Manipal Cigna",
+      products: [
+        {
+          name: "Pro health",
+          UIN: "DSFNJDSNFJDF",
+        },
+      ]
+    },
+    {
+      name: "Bharti AXA General Insurance ",
+      products: [
+        {
+          name: "Smart Super health Insurance",
+          UIN: "DFJDFDS4JFJD",
+        },
+      ]
+    },
+  ]
+
+
