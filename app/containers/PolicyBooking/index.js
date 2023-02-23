@@ -77,26 +77,26 @@ function BookPolicy({
 
 
     const [RFQsList, setRFQsList] = useState([
-        {
-            _id: "632b05e05de4ee2a18c3b864",
-            name: "RFQ1"
-        },
-        {
-            _id: "632b05e05de4ee2a18c3b865",
-            name: "RFQ2"
-        },
-        {
-            _id: "632b05e05de4ee2a18c3b866",
-            name: "RFQ3"
-        },
-        {
-            _id: "632b05e05de4ee2a18c3b867",
-            name: "RFQ4"
-        },
-        {
-            _id: "632b05e05de4ee2a18c3b868",
-            name: "RFQ4"
-        },
+        // {
+        //     _id: "632b05e05de4ee2a18c3b864",
+        //     name: "RFQ1"
+        // },
+        // {
+        //     _id: "632b05e05de4ee2a18c3b865",
+        //     name: "RFQ2"
+        // },
+        // {
+        //     _id: "632b05e05de4ee2a18c3b866",
+        //     name: "RFQ3"
+        // },
+        // {
+        //     _id: "632b05e05de4ee2a18c3b867",
+        //     name: "RFQ4"
+        // },
+        // {
+        //     _id: "632b05e05de4ee2a18c3b868",
+        //     name: "RFQ4"
+        // },
     ]);
 
     const [RFQText, setRFQText] = useState("");
@@ -108,7 +108,7 @@ function BookPolicy({
     console.log("booking_id: ", booking_id);
 
     function getRFQListCall(value="") {
-        request('get', urls.PREFIX + `/pbs/RFQList`)
+        request('get', urls.RFQ_URL_prefix + `/rfqs/`)
             .then(function (response) {
                 console.log("Response", response);
                 console.log("Data", response && response.data);
@@ -121,7 +121,7 @@ function BookPolicy({
 
 
     useEffect(() => {
-        // getRFQListCall();
+        getRFQListCall();
 
 
 
@@ -260,29 +260,18 @@ function BookPolicy({
                 <Grid xs={8} >
                     <Autocomplete
                         options={RFQsList}
-                        getOptionLabel={option => option.name}
+                        getOptionLabel={option => option.client_name}
                         className="claim-inputs"
-                        value={state.RFQ_id ? RFQsList.find(x => x._id === state.RFQ_id) : { _id: "", name: RFQText }}
+                        value={state.RFQ_id ? RFQsList.find(x => x._id === state.RFQ_id) : { _id: "", client_name: RFQText }}
                         onChange={(event, value) => {
                             console.log("value: ", value);
                             // console.log(value.id);
 
-                            value && setState({ ...state, RFQ_id: value._id});
-
                             if (value) {
-                                // console.log("value._id: ", value.id);
-                                // request('get', urls.PC_PREFIX + "/policyconfig/" + value.id + "/zones")
-                                //     .then(function (response) {
-                                //         console.log("Response", response);
-                                //         console.log("Data", response.data);
-                                //         const response_zones = response.data.data;
-                                //         const checked_zones = response_zones.filter(item => item.checkbox.indexOf("TRUE") !== -1);
-                                //         setPolicyZones(checked_zones);
-                                //     })
-                                //     .catch(function (error) {
-                                //         console.log(error);
-                                //     })
-                                // getPolicyCriticalParamsCall(value.id);
+                                let temp = {...state.payment_details};
+                                temp.payment_demanded_on = new Date(value && value.updatedAt);
+                                temp.payment_demanded = value && value.premium && value.premium.total_payable;
+                                setState({ ...state, RFQ_id: value._id, payment_details: temp});
                             }
                         }}
                         renderInput={params => (

@@ -24,6 +24,7 @@ export const urls = {
   TPA_COMMON: configuration.TPA_COMMON_BE_URL_PREFIX,
 
   PC_PREFIX: configuration.TPA_PC_BE_URL_prefix,
+  RFQ_URL_prefix: configuration.RFQ_URL_prefix,
 
 
 
