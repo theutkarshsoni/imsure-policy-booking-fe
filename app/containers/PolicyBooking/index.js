@@ -164,14 +164,14 @@ function BookPolicy({
     const [state, setState] = useState({
         RFQ_id: "",
         // policy_number: faker.random.alphaNumeric(16).toUpperCase(),
-        inception_date: new Date(new Date().setMonth(new Date().getMonth() - 6)),
-        expiry_date: new Date(new Date().setMonth(new Date().getMonth() + 6)),
-        renewal_date: new Date(new Date().setMonth(new Date().getMonth() + 5)),
+        inception_date: new Date(),
+        expiry_date: new Date(new Date().setMonth(new Date().getMonth() + 12)),
+        renewal_date: new Date(new Date().setMonth(new Date().getMonth() + 11)),
         IAPN: "",
 
         payment_details: {
-            payment_demanded: "",
-            payment_demanded_on: "",
+            payment_demanded: "2443781",
+            payment_demanded_on: new Date(),
             payment_received: "",
             payment_received_on: "",
             payment_from_bank: "",
@@ -199,6 +199,26 @@ function BookPolicy({
         "Disabled children",
         "Other dependents",
     ];
+
+    const dateFormatter = (date) => {
+        let newDate = new Date(date);
+        const months = [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Dec"
+        ];
+        let formattedDate = newDate.getDate() + " " + months[newDate.getMonth()] + " " + newDate.getUTCFullYear();
+        return formattedDate;
+    }
 
 
 
@@ -357,8 +377,73 @@ function BookPolicy({
 
             <h3>Payment Details: </h3>
 
+
+                <table border={"1px solid #EEEEEE"}>
+                    <tr>
+                        <th > Date </th>
+                        <th > Particulars </th>
+                        <th > Amount </th>
+                    </tr>
+                    <tr>
+                            <td style={{padding:"10px 10px 10px 25px"}}> {state.payment_details.payment_demanded_on && dateFormatter(state.payment_details.payment_demanded_on)} </td>
+                            <td style={{padding:"10px"}}> Invoice Amount (from RFQ) </td>
+                    <td align="right" style={{ padding: "10px" }}> {Number(state.payment_details.payment_demanded).toLocaleString('en-IN', {
+                        maximumFractionDigits: 2,
+                        style: 'currency',
+                        currency: 'INR'
+                    })} </td>
+                    </tr>
+                    <tr>
+                        <td style={{padding:"10px"}}> 
+                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                            <KeyboardDatePicker
+                                margin="normal"
+                                style={{ width: "90%", marginLeft: "5%" }}
+                                id="date-picker-dialog"
+                                // label="Payment Received On"
+                                format="dd MMM yyyy"
+                                value={state.payment_details.payment_received_on || new Date()}
+                                onChange={(date) => {
+                                    let temp = { ...state.payment_details };
+                                    temp.payment_received_on = date;
+                                    setState({ ...state, payment_details: temp })
+                                }}
+                                KeyboardButtonProps={{
+                                    'aria-label': 'change date',
+                                }}
+                            />
+                        </MuiPickersUtilsProvider>    
+                        </td>
+                        <td style={{padding:"10px"}}> Total received amount </td>
+                    <td align="right" style={{padding:"10px"}}>
+                        <TextField
+                            style={{ width: "100%" }}
+                            // label="Payment Received"
+                            // variant="outlined"
+                            inputProps={{ style: { textAlign: 'right' }}}
+                            value={state.payment_details.payment_received}
+                            onChange={(event) => {
+                                let temp = { ...state.payment_details };
+                                temp.payment_received = event.target.value;
+                                setState({ ...state, payment_details: temp })
+                            }}
+                        />
+                    </td>
+                    </tr>
+                    {/*<tr>
+                        <td> __24-Feb-2023__ </td>
+                        <td> Total rreceived amount </td>
+                        <td> <input /> </td>
+                    </tr>
+                    <tr>
+                        <td> __24-Feb-2023__ </td>
+                        <td> Total rreceived amount </td>
+                        <td> <input /> </td>
+                    </tr> */}
+                </table>
+
             <Grid container>
-                <Grid xs={3} style={{padding:"10px"}}>
+                {/* <Grid xs={3} style={{padding:"10px"}}>
                 <TextField
                         style={{ width: "100%" }}
                         label="Payment Demanded"
@@ -424,7 +509,7 @@ function BookPolicy({
                             }}
                         />
                         </MuiPickersUtilsProvider>
-                </Grid>
+                </Grid> */}
 
                 <Grid xs={3} style={{padding:"10px"}}>
                 <TextField
@@ -513,7 +598,20 @@ function BookPolicy({
                     Generate IAPN
                 </button>
                 :
-                <h3>IAPN: {state.IAPN}</h3>}
+                    <div>
+                        <h3 style={{marginRight: "15px"}}>IAPN: </h3>
+                            <TextField
+                                // style={{ width: "100%" }}
+                                // label="IAPN"
+                                // variant="outlined"
+                                value={state.IAPN}
+                                onChange={(event) => {
+                                    // let temp = {...state.payment_details};
+                                    // temp.remarks = event.target.value;
+                                    setState({ ...state, IAPN: event.target.value })
+                                }}
+                            />
+                    </div>}
             </div>
             <div>
                 {booking_id == "new" && 
