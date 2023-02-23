@@ -2,10 +2,13 @@
 
 export AWS_PROFILE=cz
 
-s3bucket="dev-star-uw.claimzippy.com"
-cfdist="E3KQ8JHXYTDR60"
+# s3bucket="dev-star-uw.claimzippy.com"
+# cfdist="E3KQ8JHXYTDR60"
+s3bucket="dev-pb.claimzippy.com"
+cfdist="E5KVXJCBNFZU5"
 
-echo "Starting Make Live Star Dev Process" && \
+# echo "Starting Make Live Star Dev Process" && \
+echo "Starting Make Live Dev Process" && \
 echo "Starting with the build" && \
 npm run build && \
 echo "Build Done" && \
