@@ -66,7 +66,7 @@ export function Login() {
             <div className='large-bold-font' style={{ marginBottom: '50px' }}>
                 Welcome to ClaimZippy
                 <br />
-                Policy Enrollment Console
+                Policy Booking Console
             </div>
             <div className="form-group">
                 <TextField
