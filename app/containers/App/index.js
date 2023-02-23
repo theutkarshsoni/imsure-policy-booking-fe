@@ -55,6 +55,8 @@ import SubscriptionList from '../SubscriptionList';
 import GMCCreateSubscription from '../GMCCreateSubscription';
 import RetailCreateSubscription from '../RetailCreateSubscription';
 import LossRatioAnalytics from '../LossRatioAnalytics';
+import BookingList from '../BookingList';
+import BookPolicy from '../PolicyBooking';
 
 
 
@@ -110,7 +112,9 @@ export default function App() {
 
 
 
-        <PrivateRoute exact path="/" component={Dashboard} />
+        {/* <PrivateRoute exact path="/" component={Dashboard} /> */}
+        <PrivateRoute exact path="/" component={BookingList} />
+        <PrivateRoute exact path="/bookings/:booking_id" component={BookPolicy} />
 
         {/* <PrivateRoute exact path="/tpas" component={TPAList} />
 
