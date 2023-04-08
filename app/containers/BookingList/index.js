@@ -106,6 +106,10 @@ function BookingList({
             key: ""
         },
         {
+            label: "Stage",
+            key: ""
+        },
+        {
             label: "Payment Remarks",
             key: ""
         },
@@ -165,6 +169,8 @@ function BookingList({
             getBookingsListCall();
         }
     }
+
+    const stageList = [{ key: 1, name: "Confirmed" }, { key: 2, name: "Payment awaited" }, { key: 3, name: "Payment received" }, { key: 4, name: "Policy generated" }, { key: 5, name: "Enrollment open" }, { key: 6, name: "Enrollment started" }, { key: 7, name: "Enrollment in progress" }, { key: 8, name: "Enrollment closed" }, { key: 9, name: "Endorsement payment awaited" }, { key: 10, name: "New endorsements received and awaiting" }, { key: 11, name: "New endorsements processed" }, { key: 12, name: "Endorsement refund to be processed" }, { key: 13, name: "Endorsement refund processed" }];
 
     return (
 
@@ -277,6 +283,12 @@ function BookingList({
                                     >
                                         {/* {item.expiry_date && dateFormatter(item.expiry_date)} */}
                                         {item.expiry_date && item.expiry_date.length > 12 ? dateFormatter(item.expiry_date) : item.expiry_date}
+                                    </td>
+
+                                    <td
+                                        className="dashboard_table_data"
+                                    >
+                                        {(stageList.find((e) => e.key == item.stage) && stageList.find((e) => e.key == item.stage).name) || item.stage}
                                     </td>
 
                                     <td
