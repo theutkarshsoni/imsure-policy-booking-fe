@@ -119,6 +119,28 @@ function BookPolicy({
             })
     }
 
+    function getPolicyDefinitionsCall(value = "") {
+        request('get', urls.RFQ_URL_prefix + `/rfqs/${value}`)
+            .then(function (response) {
+                console.log("Response", response);
+                console.log("Data", response && response.data);
+                let policy_id = response && response.data && response.data.data && response.data.data.policy;
+                console.log("policy_id", policy_id);
+                request('get', urls.PC_PREFIX + `/policyconfig/${policy_id}/details/definitions`)
+                    .then(function (response) {
+                        console.log("Response", response);
+                        console.log("Data", response && response.data);
+                        setPolicyDefinitions(response && response.data && response.data.data["definitions"] && response.data.data["definitions"].legal_definitions || []);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+    }
+
 
     useEffect(() => {
         getRFQListCall();
@@ -137,6 +159,7 @@ function BookPolicy({
                         setState({
                             ...response.data.data,
                         });
+                        getPolicyDefinitionsCall(response.data.data && response.data.data.RFQ_id);
                     }
                 })
                 .catch(function (error) {
@@ -184,6 +207,10 @@ function BookPolicy({
     })
 
     console.log("state: ", state);
+
+    const [policyDefinitions, setPolicyDefinitions] = useState([]);
+
+    console.log("policyDefinitions", policyDefinitions);
 
     // const relationships = ["self", "spouse", "child", "parent", "dependent"];
 
@@ -275,6 +302,7 @@ function BookPolicy({
                                 temp.payment_demanded_on = new Date(value && value.updatedAt);
                                 temp.payment_demanded = value && value.premium && value.premium.total_payable;
                                 setState({ ...state, RFQ_id: value._id, payment_details: temp});
+                                getPolicyDefinitionsCall(value._id);
                             }
                         }}
                         renderInput={params => (
@@ -619,6 +647,27 @@ function BookPolicy({
                             />
                     </div>}
             </div>
+
+            <Grid container spacing={3} style={{ position: "relative", marginBottom: "30px" }}>
+                {policyDefinitions && Object.keys(policyDefinitions).length > 0 && policyDefinitions.map((pd) => (
+                    pd.key.includes("EoB.") ?
+                        null
+                        :
+                        <Grid item xs={3}>
+                            <div className="flip-card">
+                                <div className="flip-content">
+                                    <div class="flip-front">
+                                        <p className="flip-front-content">{pd.key}</p>
+                                    </div>
+                                    <div class="flip-back">
+                                        <p className="flip-back-content">{pd.value}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </Grid>
+                ))}
+            </Grid>
+
             <div>
                 {booking_id == "new" && 
                 <button
