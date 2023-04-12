@@ -124,6 +124,7 @@
     "react-helmet": "6.0.0-beta",
     "react-html5-camera-photo": "^1.5.4",
     "react-images-upload": "^1.2.8",
+    "react-images-uploading": "^3.1.7",
     "react-infinite-scroll-component": "^6.1.0",
     "react-intl": "2.8.0",
     "react-player": "^2.5.0",
