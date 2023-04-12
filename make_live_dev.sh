@@ -2,10 +2,10 @@
 
 export AWS_PROFILE=cz
 
-s3bucket="dev-pb.claimzippy.com"
-cfdist="E5KVXJCBNFZU5"
+s3bucket="dev-abhi-pb.claimzippy.com"
+cfdist="EQUQH5NKYSQRI"
 
-echo "Starting Make Live Dev Process" && \
+echo "Starting Make Live ABHI Dev Process" && \
 echo "Starting with the build" && \
 npm run build && \
 echo "Build Done" && \
