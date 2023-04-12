@@ -849,48 +849,6 @@ function BookPolicy({
                                         </>
                                 }
                             </Grid>
-                            <Dialog
-                                open={open}
-                                className="modal"
-                                onClose={handleClose}
-                                aria-labelledby="simple-modal-title"
-                                aria-describedby="simple-modal-description"
-                            >
-                                <DialogTitle className="modal-title">
-                                    Add logo
-                                </DialogTitle>
-
-                                <div className="paper">
-                                    <div style={{ marginLeft: '20px', marginTop: "25px" }}>
-                                        <ImageUploading
-                                            // multiple
-                                            // value={images}
-                                            onChange={onGalleryPick}
-                                            maxNumber={1}
-                                            dataURLKey="data_url"
-                                        >
-                                            {({
-                                                imageList,
-                                                onImageUpload,
-                                                onImageRemoveAll,
-                                                onImageUpdate,
-                                                onImageRemove,
-                                                isDragging,
-                                                dragProps
-                                            }) => (
-                                                // write your building UI
-                                                <div className="upload__image-wrapper"
-                                                    style={isDragging ? { color: "red" } : null}
-                                                    onClick={onImageUpload}
-                                                    {...dragProps}>
-                                                    <input type="image" src={gallery_ic} />
-                                                    <span className="add-from-text">Pick from gallery</span>
-                                                </div>
-                                            )}
-                                        </ImageUploading>
-                                    </div>
-                                </div>
-                            </Dialog>
                         </>
                     )
                 }
@@ -939,52 +897,54 @@ function BookPolicy({
                                         </>
                                 }
                             </Grid>
-                            <Dialog
-                                open={open}
-                                className="modal"
-                                onClose={handleClose}
-                                aria-labelledby="simple-modal-title"
-                                aria-describedby="simple-modal-description"
-                            >
-                                <DialogTitle className="modal-title">
-                                    Upload document
-                                </DialogTitle>
-
-                                <div className="paper">
-                                    <div style={{ marginLeft: '20px', marginTop: "25px" }}>
-                                        <ImageUploading
-                                            // multiple
-                                            // value={images}
-                                            onChange={onGalleryPick}
-                                            maxNumber={1}
-                                            dataURLKey="data_url"
-                                        >
-                                            {({
-                                                imageList,
-                                                onImageUpload,
-                                                onImageRemoveAll,
-                                                onImageUpdate,
-                                                onImageRemove,
-                                                isDragging,
-                                                dragProps
-                                            }) => (
-                                                // write your building UI
-                                                <div className="upload__image-wrapper"
-                                                    style={isDragging ? { color: "red" } : null}
-                                                    onClick={onImageUpload}
-                                                    {...dragProps}>
-                                                    <input type="image" src={gallery_ic} />
-                                                    <span className="add-from-text">Pick from gallery</span>
-                                                </div>
-                                            )}
-                                        </ImageUploading>
-                                    </div>
-                                </div>
-                            </Dialog>
                         </>
                     )
                 }
             </Grid>
+
+            <Dialog
+                open={open}
+                className="modal"
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                <DialogTitle className="modal-title">
+                    {docType == "required_documents" ? "Upload Document"
+                        : (docType == "logo") ? "Add logo" : "Upload Image"}
+                </DialogTitle>
+
+                <div className="paper">
+                    <div style={{ marginLeft: '20px', marginTop: "25px" }}>
+                        <ImageUploading
+                            // multiple
+                            // value={images}
+                            onChange={onGalleryPick}
+                            maxNumber={1}
+                            dataURLKey="data_url"
+                        >
+                            {({
+                                imageList,
+                                onImageUpload,
+                                onImageRemoveAll,
+                                onImageUpdate,
+                                onImageRemove,
+                                isDragging,
+                                dragProps
+                            }) => (
+                                // write your building UI
+                                <div className="upload__image-wrapper"
+                                    style={isDragging ? { color: "red" } : null}
+                                    onClick={onImageUpload}
+                                    {...dragProps}>
+                                    <input type="image" src={gallery_ic} />
+                                    <span className="add-from-text">Pick from gallery</span>
+                                </div>
+                            )}
+                        </ImageUploading>
+                    </div>
+                </div>
+            </Dialog>
 
             <div>
                 {!state.IAPN ? 
