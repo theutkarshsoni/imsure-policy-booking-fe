@@ -77,6 +77,7 @@ function BookPolicy({
     });
     const [keyType, setKeyType] = useState("");
     const [docType, setDocType] = useState("");
+    const [files, setFiles] = useState([]);
 
     const [policyZones, setPolicyZones] = useState([]);
     console.log("policyZones: ", policyZones);
@@ -204,11 +205,13 @@ function BookPolicy({
     };
 
     const onGalleryPick = (imageList) => {
+        console.log("image list", imageList)
         // function to add image
         imageList.map((image, i) => {
             let temp = { ...state[docType] };
             temp[keyType] = image['data_url'];
             setState({...state, [docType]: temp});
+            setFiles([...files, {name: `${docType}.${keyType}`, file: image["file"]}])
         })
         handleClose();
     };
@@ -285,6 +288,71 @@ function BookPolicy({
             remarks: "",
         }
     })
+
+    const handleFormData = (data, files) => {
+        let formData = new FormData();
+        let arr = Object.keys(data);
+        console.log("log Data", data, files);
+
+        for(let i=0; i< arr.length; i++) {
+
+            if(arr[i] == "logo") {
+                let logo = {};
+                let logoTypeArr = Object.keys(data["logo"])
+                for(let j=0; j<Object.keys(data["logo"]).length; j++) {
+                    if(data["logo"][logoTypeArr[j]].includes("base64")) {
+                        logo[logoTypeArr[j]] = ""
+                    }
+                    else {
+                        logo[logoTypeArr[j]] = data["logo"][logoTypeArr[j]]
+                    }
+                }
+                formData.append(arr[i], JSON.stringify(logo))
+            }
+            else if(arr[i] == "required_documents") {
+                let required_documents = {};
+                let required_documentsTypeArr = Object.keys(data["required_documents"])
+                for(let j=0; j<Object.keys(data["required_documents"]).length; j++) {
+                    if(data["required_documents"][required_documentsTypeArr[j]].includes("base64")) {
+                        required_documents[required_documentsTypeArr[j]] = ""
+                    }
+                    else {
+                        required_documents[required_documentsTypeArr[j]] = data["required_documents"][required_documentsTypeArr[j]]
+                    }
+                }
+                formData.append(arr[i], JSON.stringify(required_documents))
+            }
+            else if(arr[i] == "payment_details") {
+                formData.append(arr[i], JSON.stringify(data[arr[i]]))
+            }
+            else if(arr[i] == "hr_details") {
+                formData.append(arr[i], JSON.stringify(data[arr[i]]))
+            }
+            else {
+                formData.append(arr[i], data[arr[i]])
+            }
+
+            
+            console.log(`form data ${arr[i]}`, formData.get(arr[i]));
+        }
+        for(let i=0; i<files.length; i++) {
+            formData.append(`${files[i].name}`, files[i].file, files[i].file.name)
+            console.log(`form data ${files[i].name}`, formData.get(files[i].name));
+        }
+
+        request('put', urls.PREFIX + "/pbs/" + booking_id,
+        formData
+        )
+            .then(response => {
+                toast.success(response.data.message, { autoClose: 4000 });
+                browserRedirect("/");
+
+            })
+            .catch(error => console.log(error))
+
+
+        
+    }
 
     console.log("state: ", state);
 
@@ -1032,15 +1100,19 @@ function BookPolicy({
                                             label: 'Yes',
                                             onClick: () => {
                                                 {
-                                                    request('put', urls.PREFIX + "/pbs/" + booking_id,
-                                                        state
-                                                    )
-                                                        .then(response => {
-                                                            toast.success(response.data.message, { autoClose: 4000 });
-                                                            browserRedirect("/");
 
-                                                        })
-                                                        .catch(error => console.log(error))
+                                                    handleFormData(state, files);
+                                                    // let newPayload = new FormData();
+
+                                                    // request('put', urls.PREFIX + "/pbs/" + booking_id,
+                                                    //     state
+                                                    // )
+                                                    //     .then(response => {
+                                                    //         toast.success(response.data.message, { autoClose: 4000 });
+                                                    //         browserRedirect("/");
+
+                                                    //     })
+                                                    //     .catch(error => console.log(error))
                                                 }
                                             }
                                         },
