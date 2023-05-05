@@ -2,10 +2,10 @@
 
 export AWS_PROFILE=cz
 
-s3bucket="dev-pb.claimzippy.com"
-cfdist="E5KVXJCBNFZU5"
+s3bucket="dev-linkk-pb.claimzippy.com"
+cfdist="EZTGSG7KS9RTO"
 
-echo "Starting Make Live Dev Process" && \
+echo "Starting Make Live Dev Linkk Process" && \
 echo "Starting with the build" && \
 npm run build && \
 echo "Build Done" && \
