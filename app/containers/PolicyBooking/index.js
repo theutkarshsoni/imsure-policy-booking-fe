@@ -3,7 +3,7 @@ const faker = require('faker');
 
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { makeStyles, Grid, Dialog, DialogTitle, List, ListItem, ListItemText, Checkbox, DialogContent, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@material-ui/core';
+import { makeStyles, Grid, Select, MenuItem, InputLabel, Dialog, DialogTitle, List, ListItem, ListItemText, Checkbox, DialogContent, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@material-ui/core';
 
 import DeleteIcon from '@material-ui/icons/Delete';
 import AddIcon from '@material-ui/icons/Add';
@@ -19,11 +19,16 @@ import Switch from 'react-switch';
 import request from '../../utils/request';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ImageUploading from 'react-images-uploading';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import { useParams } from 'react-router-dom';
 import InfiniteScroll from "react-infinite-scroll-component";
+
+const add_page = require("../../images/add_page.svg");
+const remove_ic = require("../../images/remove_ic.svg");
+const gallery_ic = require("../../images/gallery_ic.svg");
 
 const useStyles = makeStyles({
     root: {
@@ -64,6 +69,15 @@ function BookPolicy({
     const [itemPerPageS, setItemPerPageS] = useState(20);
     const [pageNoS, setPageNoS] = useState(0);
 
+    const [open, setOpen] = useState(false);
+    const [preview, setPreview] = useState({
+        shown: false,
+        itemKey: "",
+        itemType: ""
+    });
+    const [keyType, setKeyType] = useState("");
+    const [docType, setDocType] = useState("");
+    const [files, setFiles] = useState([]);
 
     const [policyZones, setPolicyZones] = useState([]);
     console.log("policyZones: ", policyZones);
@@ -101,11 +115,25 @@ function BookPolicy({
 
     const [RFQText, setRFQText] = useState("");
 
+    const [policyRequiredDocuments, setPolicyRequiredDocuments] = useState([]);
+
     const routeParams = useParams();
     console.log("routeParams: ", routeParams);
 
     const { booking_id } = routeParams;
     console.log("booking_id: ", booking_id);
+    
+    function arraysAreEqual(array1, array2) {
+        if (array1.length === array2.length) {
+            return array1.every(element => {
+                if (array2.includes(element)) {
+                    return true;
+                }
+                return false;
+            });
+        }
+        return false;
+    }
 
     function getRFQListCall(value="") {
         request('get', urls.RFQ_URL_prefix + `/rfqs/`)
@@ -118,6 +146,75 @@ function BookPolicy({
                 console.log(error);
             })
     }
+
+    function getPolicyDefinitionsCall(value = "") {
+        request('get', urls.RFQ_URL_prefix + `/rfqs/${value}`)
+            .then(function (response) {
+                console.log("Response", response);
+                console.log("Data", response && response.data);
+                let policy_id = response && response.data && response.data.data && response.data.data.policy;
+                console.log("policy_id", policy_id);
+                request('get', urls.PC_PREFIX + `/policyconfig/${policy_id}/details/definitions`)
+                    .then(function (response) {
+                        console.log("Response", response);
+                        console.log("Data", response && response.data);
+                        setPolicyDefinitions(response && response.data && response.data.data["definitions"] && response.data.data["definitions"].legal_definitions || []);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+    }
+
+    function getPolicyBasicDetailsCall(value = "") {
+        request('get', urls.RFQ_URL_prefix + `/rfqs/${value}`)
+            .then(function (response) {
+                console.log("RFQ Policy Response", response);
+                console.log("RFQ Policy Data", response && response.data);
+                let policy_id = response && response.data && response.data.data && response.data.data.policy;
+                console.log("policy_id", policy_id);
+                request('get', urls.PC_PREFIX + `/policyconfig/${policy_id}/details/bd`)
+                    .then(function (response) {
+                        console.log("BD Response", response);
+                        console.log("BD Data", response && response.data);
+                        if (response && response.data && response.data.data && response.data.data.required_documents_for_policy_booking) {
+                            setPolicyRequiredDocuments(response.data.data.required_documents_for_policy_booking);
+                            // if (!(state && state.required_documents && Object.keys(state.required_documents).length > 0)) {
+                            //     let tempObj = {};
+                            //     response.data.data.required_documents_for_policy_booking.forEach(element => {
+                            //         tempObj[element] = "";
+                            //     });
+                            //     setState({ ...state, required_documents: tempObj});
+                            // }
+                        }
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                    })
+            })
+            .catch(function (error) {
+                console.log(error);
+            })
+    }
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    const onGalleryPick = (imageList) => {
+        console.log("image list", imageList)
+        // function to add image
+        imageList.map((image, i) => {
+            let temp = { ...state[docType] };
+            temp[keyType] = image['data_url'];
+            setState({...state, [docType]: temp});
+            setFiles([...files, {name: `${docType}.${keyType}`, file: image["file"]}])
+        })
+        handleClose();
+    };
 
 
     useEffect(() => {
@@ -137,6 +234,8 @@ function BookPolicy({
                         setState({
                             ...response.data.data,
                         });
+                        getPolicyDefinitionsCall(response.data.data && response.data.data.RFQ_id);
+                        getPolicyBasicDetailsCall(response.data.data && response.data.data.RFQ_id);
                     }
                 })
                 .catch(function (error) {
@@ -168,6 +267,14 @@ function BookPolicy({
         expiry_date: new Date(new Date().setMonth(new Date().getMonth() + 12)),
         renewal_date: new Date(new Date().setMonth(new Date().getMonth() + 11)),
         IAPN: "",
+        stage: "",
+        hr_details: [],
+        logo: {
+            company: "https://dev-pb.claimzippy.com/a0d7bcab19794dcf3eba0171b97ffef2.png",
+            insurer: "https://dev-pb.claimzippy.com/a0d7bcab19794dcf3eba0171b97ffef2.png",
+            TPA: "https://dev-pb.claimzippy.com/a0d7bcab19794dcf3eba0171b97ffef2.png",
+        },  // Default is CZ logo
+        required_documents: {},
 
         payment_details: {
             payment_demanded: "2443781",
@@ -182,7 +289,76 @@ function BookPolicy({
         }
     })
 
+    const handleFormData = (data, files) => {
+        let formData = new FormData();
+        let arr = Object.keys(data);
+        console.log("log Data", data, files);
+
+        for(let i=0; i< arr.length; i++) {
+
+            if(arr[i] == "logo") {
+                let logo = {};
+                let logoTypeArr = Object.keys(data["logo"])
+                for(let j=0; j<Object.keys(data["logo"]).length; j++) {
+                    if(data["logo"][logoTypeArr[j]].includes("base64")) {
+                        logo[logoTypeArr[j]] = ""
+                    }
+                    else {
+                        logo[logoTypeArr[j]] = data["logo"][logoTypeArr[j]]
+                    }
+                }
+                formData.append(arr[i], JSON.stringify(logo))
+            }
+            else if(arr[i] == "required_documents") {
+                let required_documents = {};
+                let required_documentsTypeArr = Object.keys(data["required_documents"])
+                for(let j=0; j<Object.keys(data["required_documents"]).length; j++) {
+                    if(data["required_documents"][required_documentsTypeArr[j]].includes("base64")) {
+                        required_documents[required_documentsTypeArr[j]] = ""
+                    }
+                    else {
+                        required_documents[required_documentsTypeArr[j]] = data["required_documents"][required_documentsTypeArr[j]]
+                    }
+                }
+                formData.append(arr[i], JSON.stringify(required_documents))
+            }
+            else if(arr[i] == "payment_details") {
+                formData.append(arr[i], JSON.stringify(data[arr[i]]))
+            }
+            else if(arr[i] == "hr_details") {
+                formData.append(arr[i], JSON.stringify(data[arr[i]]))
+            }
+            else {
+                formData.append(arr[i], data[arr[i]])
+            }
+
+            
+            console.log(`form data ${arr[i]}`, formData.get(arr[i]));
+        }
+        for(let i=0; i<files.length; i++) {
+            formData.append(`${files[i].name}`, files[i].file, files[i].file.name)
+            console.log(`form data ${files[i].name}`, formData.get(files[i].name));
+        }
+
+        request('put', urls.PREFIX + "/pbs/" + booking_id,
+        formData
+        )
+            .then(response => {
+                toast.success(response.data.message, { autoClose: 4000 });
+                browserRedirect("/");
+
+            })
+            .catch(error => console.log(error))
+
+
+        
+    }
+
     console.log("state: ", state);
+
+    const [policyDefinitions, setPolicyDefinitions] = useState([]);
+
+    console.log("policyDefinitions", policyDefinitions);
 
     // const relationships = ["self", "spouse", "child", "parent", "dependent"];
 
@@ -220,17 +396,71 @@ function BookPolicy({
         return formattedDate;
     }
 
+    useEffect(() => {
+        if (policyRequiredDocuments && Object.keys(policyRequiredDocuments).length > 0) {
+            if (!(state && state.required_documents && Object.keys(state.required_documents).length > 0)) {
+                // empty required_documents case
+                let tempObj = {};
+                policyRequiredDocuments.forEach(element => {
+                    tempObj[element] = "";
+                });
+                setState({ ...state, required_documents: tempObj });
+                console.log("policy required documents changed");
+            } else {
+                // non-mepty required_documents case
+                // compare if policyRequiredDocuments & Object.keys(state.required_documents) is same
+                if (state.required_documents && Object.keys(state.required_documents).length > 0) {
+                    if (!(arraysAreEqual(policyRequiredDocuments, Object.keys(state.required_documents)))) {
+                        // if not, update required_documents with new keys
+                        let tempObj = {};
+                        policyRequiredDocuments.forEach(element => {
+                            tempObj[element] = "";
+                        });
+                        setState({ ...state, required_documents: tempObj });
+                        console.log("policy required documents changed as different docs required");
+                    }
+                    // if yes, leave as it is
+                }
+            }
+        }
+    }, [policyRequiredDocuments]);
+
 
 
     const marital_statuses = ["Unmarried", "Married", "Divorced without children", "Divorced with children"];
 
     const [loadFromTemplateOpen, setLoadFromTemplateOpen] = useState(false);
 
+    const stageList = [{ key: 1, name: "Confirmed" }, { key: 2, name: "Payment awaited" }, { key: 3, name: "Payment received" }, { key: 4, name: "Policy generated" }, { key: 5, name: "Enrollment open" }, { key: 6, name: "Enrollment started" }, { key: 7, name: "Enrollment in progress" }, { key: 8, name: "Enrollment closed" }, { key: 9, name: "Endorsement payment awaited" }, { key: 10, name: "New endorsements received and awaiting" }, { key: 11, name: "New endorsements processed" }, { key: 12, name: "Endorsement refund to be processed" }, { key: 13, name: "Endorsement refund processed" }];
+
     return (
         <div>
 
             <ToastContainer />
 
+            {
+                preview.shown ?
+
+                    <>
+                        <Dialog
+                            open={preview.shown}
+                            className="modal"
+                            onClose={() => {
+                                setPreview({
+                                    shown: false,
+                                    itemKey: "",
+                                    itemType: ""
+                                });
+                            }}
+                            aria-labelledby="simple-modal-title"
+                            aria-describedby="simple-modal-description">
+
+                            <img src={state[preview.itemType][preview.itemKey]}></img>
+
+                        </Dialog>
+                    </> : null
+
+            }
 
             <button
                 className="primary-button"
@@ -272,6 +502,8 @@ function BookPolicy({
                                 temp.payment_demanded_on = new Date(value && value.updatedAt);
                                 temp.payment_demanded = value && value.premium && value.premium.total_payable;
                                 setState({ ...state, RFQ_id: value._id, payment_details: temp});
+                                getPolicyDefinitionsCall(value._id);
+                                getPolicyBasicDetailsCall(value._id);
                             }
                         }}
                         renderInput={params => (
@@ -574,8 +806,213 @@ function BookPolicy({
             </Grid>
 
 
+            <FormControl variant="outlined" style={{ width: "30%", margin: "25px 0px" }}>
+                <InputLabel id="demo-simple-select-outlined-label">Stage</InputLabel>
+                <Select
+                    labelId="demo-simple-select-outlined-label"
+                    id="stage-select-outlined"
+                    value={state.stage}
+                    onChange={(event) => setState({ ...state, stage: event.target.value })}
+                    label="Stage"
+                >
+                    {stageList && Object.keys(stageList).length > 0 && stageList.map((sl) => (
+                        <MenuItem value={sl.key}>{sl.name}</MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+
+            <h3>Contact Details:</h3>
+
+            {
+                state && Object.keys(state).length > 0 && state.hr_details && Object.keys(state.hr_details).length > 0 &&
+                state.hr_details.map((hr_obj, hr_idx) =>
+                    <Grid container>
+                        {["name", "email", "mobile", "designation"].map(hr_obj_key =>
+                            <Grid xs={hr_obj_key == "designation" ? 2 : 3} style={{ padding: "10px" }}>
+                                <TextField
+                                    style={{ width: "100%" }}
+                                    label={`Enter ${hr_obj_key}`}
+                                    variant="outlined"
+                                    required={(hr_obj_key == "email") || (hr_obj_key == "mobile")}
+                                    value={hr_obj[hr_obj_key]}
+                                    onChange={(event) => {
+                                        let temp = [...state.hr_details];
+                                        temp[hr_idx][hr_obj_key] = event.target.value;
+                                        setState({ ...state, hr_details: temp });
+                                    }}
+                                />
+                            </Grid>
+                        )}
+                        <Grid xs={1} style={{ padding: "10px" }}>
+                            <button
+                                className="grey-button"
+                                onClick={() => {
+                                    let temp = [...state.hr_details];
+                                    temp.splice(hr_idx, 1);
+                                    setState({ ...state, hr_details: temp });
+                                }}
+                            >
+                                <b>DEL</b>
+                            </button>
+                        </Grid>
+                    </Grid>
+                )
+            }
+            <div>
+                <button
+                    className="grey-button"
+                    onClick={() => {
+                        let temp = [...state.hr_details];
+                        temp.push({
+                            "designation": "",
+                            "email": "",
+                            "mobile": "",
+                            "name": ""
+                        })
+                        setState({ ...state, hr_details: temp });
+                    }}>
+                    <b>Add contact</b>
+                </button>
+            </div>
+
+            <h3>Update Images:</h3>
+            <Grid container>
+                {
+                    ["company", "insurer", "TPA"].map(logoKey =>
+                        <>
+                            <Grid xs={3} style={{ padding: "10px" }}>
+                                <div style={{ display: "inline-block" }}>{logoKey.charAt(0).toUpperCase() + logoKey.slice(1)} logo:</div>
+                                <br />
+                                <br />
+                                {
+                                    state && state.logo && Object.keys(state.logo).length > 0 && state.logo[logoKey]
+                                        ?
+                                        <div style={{ display: "inline-block" }} className="content">
+                                            <img src={state.logo[logoKey]} className="bill-image" onClick={() => {
+                                                // function to preview attachment
+                                                setPreview({
+                                                    shown: true,
+                                                    itemKey: logoKey,
+                                                    itemType: "logo"
+                                                })
+                                            }} />
 
 
+                                            <img src={remove_ic} className="remove_media_icon" onClick={() => {
+                                                // function to remove image
+                                                let temp = { ...state.logo };
+                                                temp[logoKey] = "";
+                                                setState({ ...state, logo: temp });
+                                            }} />
+
+                                        </div>
+                                        :
+                                        <>
+                                            <input type="image" src={add_page} height="50px" onClick={() => {
+                                                setOpen(true);
+                                                setKeyType(logoKey);
+                                                setDocType("logo");
+                                            }} />
+                                            <br />
+                                        </>
+                                }
+                            </Grid>
+                        </>
+                    )
+                }
+            </Grid>
+
+            <h3>Required Documents:</h3>
+            <Grid container>
+                {
+                    state && state.required_documents && Object.keys(state.required_documents).length > 0 &&
+                    Object.keys(state.required_documents).map(docKey =>
+                        <>
+                            <Grid xs={3} style={{ padding: "10px" }}>
+                                <div style={{ display: "inline-block" }}>{docKey.charAt(0).toUpperCase() + docKey.slice(1)} :</div>
+                                <br />
+                                <br />
+                                {
+                                    state && state.required_documents && Object.keys(state.required_documents).length > 0 && state.required_documents[docKey]
+                                        ?
+                                        <div style={{ display: "inline-block" }} className="content">
+                                            <img src={state.required_documents[docKey]} className="bill-image" onClick={() => {
+                                                // function to preview attachment
+                                                setPreview({
+                                                    shown: true,
+                                                    itemKey: docKey,
+                                                    itemType: "required_documents"
+                                                })
+                                            }} />
+
+
+                                            <img src={remove_ic} className="remove_media_icon" onClick={() => {
+                                                // function to remove image
+                                                let temp = { ...state.required_documents };
+                                                temp[docKey] = "";
+                                                setState({ ...state, required_documents: temp });
+                                            }} />
+
+                                        </div>
+                                        :
+                                        <>
+                                            <input type="image" src={add_page} height="50px" onClick={() => {
+                                                setOpen(true);
+                                                setKeyType(docKey);
+                                                setDocType("required_documents");
+                                            }} />
+                                            <br />
+                                        </>
+                                }
+                            </Grid>
+                        </>
+                    )
+                }
+            </Grid>
+
+            <Dialog
+                open={open}
+                className="modal"
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                <DialogTitle className="modal-title">
+                    {docType == "required_documents" ? "Upload Document"
+                        : (docType == "logo") ? "Add logo" : "Upload Image"}
+                </DialogTitle>
+
+                <div className="paper">
+                    <div style={{ marginLeft: '20px', marginTop: "25px" }}>
+                        <ImageUploading
+                            // multiple
+                            // value={images}
+                            onChange={onGalleryPick}
+                            maxNumber={1}
+                            dataURLKey="data_url"
+                        >
+                            {({
+                                imageList,
+                                onImageUpload,
+                                onImageRemoveAll,
+                                onImageUpdate,
+                                onImageRemove,
+                                isDragging,
+                                dragProps
+                            }) => (
+                                // write your building UI
+                                <div className="upload__image-wrapper"
+                                    style={isDragging ? { color: "red" } : null}
+                                    onClick={onImageUpload}
+                                    {...dragProps}>
+                                    <input type="image" src={gallery_ic} />
+                                    <span className="add-from-text">Pick from gallery</span>
+                                </div>
+                            )}
+                        </ImageUploading>
+                    </div>
+                </div>
+            </Dialog>
 
             <div>
                 {!state.IAPN ? 
@@ -602,6 +1039,27 @@ function BookPolicy({
                             />
                     </div>}
             </div>
+
+            <Grid container spacing={3} style={{ position: "relative", marginBottom: "30px" }}>
+                {policyDefinitions && Object.keys(policyDefinitions).length > 0 && policyDefinitions.map((pd) => (
+                    pd.key.includes("EoB.") ?
+                        null
+                        :
+                        <Grid item xs={3}>
+                            <div className="flip-card">
+                                <div className="flip-content">
+                                    <div class="flip-front">
+                                        <p className="flip-front-content">{pd.key}</p>
+                                    </div>
+                                    <div class="flip-back">
+                                        <p className="flip-back-content">{pd.value}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </Grid>
+                ))}
+            </Grid>
+
             <div>
                 {booking_id == "new" && 
                 <button
@@ -642,15 +1100,19 @@ function BookPolicy({
                                             label: 'Yes',
                                             onClick: () => {
                                                 {
-                                                    request('put', urls.PREFIX + "/pbs/" + booking_id,
-                                                        state
-                                                    )
-                                                        .then(response => {
-                                                            toast.success(response.data.message, { autoClose: 4000 });
-                                                            browserRedirect("/");
 
-                                                        })
-                                                        .catch(error => console.log(error))
+                                                    handleFormData(state, files);
+                                                    // let newPayload = new FormData();
+
+                                                    // request('put', urls.PREFIX + "/pbs/" + booking_id,
+                                                    //     state
+                                                    // )
+                                                    //     .then(response => {
+                                                    //         toast.success(response.data.message, { autoClose: 4000 });
+                                                    //         browserRedirect("/");
+
+                                                    //     })
+                                                    //     .catch(error => console.log(error))
                                                 }
                                             }
                                         },

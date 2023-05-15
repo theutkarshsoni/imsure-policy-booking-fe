@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
-import { Grid, TextField, Button } from '@material-ui/core';
+import { Grid, TextField, Button, FormControl, InputLabel, OutlinedInput, InputAdornment, IconButton } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -32,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 import DeleteIcon from '@material-ui/icons/Delete';
+import ClearIcon from '@material-ui/icons/Clear';
 
 // import { confirmAlert } from 'react-confirm-alert'; // Import
 // import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
@@ -47,6 +48,7 @@ function BookingList({
 
     const [choice, setChoice] = React.useState('');
 
+    const [searchValue, setSearchValue] = useState("");
 
     const [state, setState] = useState([]);
 
@@ -104,6 +106,10 @@ function BookingList({
             key: ""
         },
         {
+            label: "Stage",
+            key: ""
+        },
+        {
             label: "Payment Remarks",
             key: ""
         },
@@ -144,6 +150,28 @@ function BookingList({
         return formattedTime;
     }
 
+    const handleSearch = (value) => {
+        setSearchValue(value);
+        if(value) {
+            request('get', urls.PREFIX + `/pbs/pb/search?iapn=${value}`)
+                .then(function (response) {
+                    console.log("Response", response);
+                    console.log("Data", response && response.data);
+                    if (response && response.data && response.data.data) {
+                        setState(response.data.data);
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                })
+        } else {
+            console.log("no search value");
+            getBookingsListCall();
+        }
+    }
+
+    const stageList = [{ key: 1, name: "Confirmed" }, { key: 2, name: "Payment awaited" }, { key: 3, name: "Payment received" }, { key: 4, name: "Policy generated" }, { key: 5, name: "Enrollment open" }, { key: 6, name: "Enrollment started" }, { key: 7, name: "Enrollment in progress" }, { key: 8, name: "Enrollment closed" }, { key: 9, name: "Endorsement payment awaited" }, { key: 10, name: "New endorsements received and awaiting" }, { key: 11, name: "New endorsements processed" }, { key: 12, name: "Endorsement refund to be processed" }, { key: 13, name: "Endorsement refund processed" }];
+
     return (
 
         <Card className='web_form_container' style={{ marginTop: "2%" }} >
@@ -176,6 +204,29 @@ function BookingList({
 
             </div>
 
+            <div style={{ marginLeft: "5%" }}>
+                <FormControl variant="outlined">
+                    <InputLabel htmlFor="outlined-search">Search by IAPN</InputLabel>
+                    <OutlinedInput
+                        id="outlined-search"
+                        type="text"
+                        value={searchValue}
+                        onChange={(event) => handleSearch(event.target.value)}
+                        endAdornment={
+                            <InputAdornment position="end">
+                                <IconButton
+                                    aria-label="clear search"
+                                    onClick={() => handleSearch("")}
+                                    edge="end"
+                                >
+                                    <ClearIcon />
+                                </IconButton>
+                            </InputAdornment>
+                        }
+                        labelWidth={120}
+                    />
+                </FormControl>
+            </div>
 
 
 
@@ -232,6 +283,12 @@ function BookingList({
                                     >
                                         {/* {item.expiry_date && dateFormatter(item.expiry_date)} */}
                                         {item.expiry_date && item.expiry_date.length > 12 ? dateFormatter(item.expiry_date) : item.expiry_date}
+                                    </td>
+
+                                    <td
+                                        className="dashboard_table_data"
+                                    >
+                                        {(stageList.find((e) => e.key == item.stage) && stageList.find((e) => e.key == item.stage).name) || item.stage}
                                     </td>
 
                                     <td
