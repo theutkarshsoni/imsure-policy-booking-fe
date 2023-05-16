@@ -340,7 +340,7 @@ function BookPolicy({
             console.log(`form data ${files[i].name}`, formData.get(files[i].name));
         }
 
-        request('put', urls.PREFIX + "/pbs/" + booking_id,
+        request(booking_id == "new" ? 'post' :'put', urls.PREFIX + "/pbs/" + booking_id,
         formData
         )
             .then(response => {
@@ -1067,15 +1067,16 @@ function BookPolicy({
                     disabled={!state.IAPN}
                     onClick={() => {
                         // axios.post(urls.PREFIX + "subscription/new", state)
-                        request('post', urls.PREFIX + "/pbs/new", state)
-                            .then(function (response) {
-                                console.log("Response", response);
-                                console.log("Data", response.data);
-                                browserRedirect("/");
-                            })
-                            .catch(function (error) {
-                                console.log(error);
-                            })
+                        handleFormData(state, files);
+                        // request('post', urls.PREFIX + "/pbs/new", state)
+                        //     .then(function (response) {
+                        //         console.log("Response", response);
+                        //         console.log("Data", response.data);
+                        //         browserRedirect("/");
+                        //     })
+                        //     .catch(function (error) {
+                        //         console.log(error);
+                        //     })
                     }}
                 >
                     Confirm Policy Booking (IAPN: {state.IAPN})
