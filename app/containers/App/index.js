@@ -101,10 +101,12 @@ export default function App() {
       </Helmet>
       {/* <Header /> */}
 
-      <img src={cz_logo} alt=""
-        style={{ width: "175px" }}
-        onClick={() => browserRedirect("/")}
-      />
+      <div id="page-nav">
+        <img src={cz_logo} alt=""
+          style={{ width: "175px" }}
+          onClick={() => browserRedirect("/")}
+        />
+      </div>
 
       <Switch>
 
