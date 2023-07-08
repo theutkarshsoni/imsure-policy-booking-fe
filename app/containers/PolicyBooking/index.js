@@ -29,6 +29,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 const add_page = require("../../images/add_page.svg");
 const remove_ic = require("../../images/remove_ic.svg");
 const gallery_ic = require("../../images/gallery_ic.svg");
+const logo = require('../../images/cz.png');
 
 const useStyles = makeStyles({
     root: {
@@ -116,6 +117,9 @@ function BookPolicy({
     const [RFQText, setRFQText] = useState("");
 
     const [policyRequiredDocuments, setPolicyRequiredDocuments] = useState([]);
+    const [policyRequiredDocumentsWithValidation, setPolicyRequiredDocumentsWithValidation] = useState([]);
+    const [requiredDocumentsError, setRequiredDocumentsError] = useState("");
+    const [isPrintable, setIsPrintable] = useState(false);
 
     const routeParams = useParams();
     console.log("routeParams: ", routeParams);
@@ -152,7 +156,7 @@ function BookPolicy({
             .then(function (response) {
                 console.log("Response", response);
                 console.log("Data", response && response.data);
-                let policy_id = response && response.data && response.data.data && response.data.data.policy;
+                let policy_id = response && response.data && response.data.data && response.data.data.product_id ? response.data.data.product_id : response.data.data.policy;
                 console.log("policy_id", policy_id);
                 request('get', urls.PC_PREFIX + `/policyconfig/${policy_id}/details/definitions`)
                     .then(function (response) {
@@ -174,14 +178,23 @@ function BookPolicy({
             .then(function (response) {
                 console.log("RFQ Policy Response", response);
                 console.log("RFQ Policy Data", response && response.data);
-                let policy_id = response && response.data && response.data.data && response.data.data.policy;
+                let policy_id = response && response.data && response.data.data && response.data.data.product_id ? response.data.data.product_id : response.data.data.policy;
                 console.log("policy_id", policy_id);
                 request('get', urls.PC_PREFIX + `/policyconfig/${policy_id}/details/bd`)
                     .then(function (response) {
                         console.log("BD Response", response);
                         console.log("BD Data", response && response.data);
                         if (response && response.data && response.data.data && response.data.data.required_documents_for_policy_booking) {
-                            setPolicyRequiredDocuments(response.data.data.required_documents_for_policy_booking);
+                            // console.log("response.data.data.required_documents_for_policy_booking", response.data.data.required_documents_for_policy_booking)
+                            let mappedDocsForPolicyBooking = response.data.data.required_documents_for_policy_booking.map(doc => {
+                                if ((typeof doc === "object") && Object.keys(doc).length > 0 && doc.document) {
+                                    return doc.document;
+                                } else if (typeof doc === "string") {
+                                    return doc;
+                                }
+                            })
+                            setPolicyRequiredDocuments(mappedDocsForPolicyBooking);
+                            setPolicyRequiredDocumentsWithValidation(response.data.data.required_documents_for_policy_booking);
                             // if (!(state && state.required_documents && Object.keys(state.required_documents).length > 0)) {
                             //     let tempObj = {};
                             //     response.data.data.required_documents_for_policy_booking.forEach(element => {
@@ -216,6 +229,21 @@ function BookPolicy({
         handleClose();
     };
 
+    const isDocRequired = (docKey) => {
+        let docObj = policyRequiredDocumentsWithValidation.find(doc => {
+            if ((typeof doc === "object") && Object.keys(doc).length > 0 && doc.document) {
+                return doc.document === docKey
+            } else if (typeof doc === "string") {
+                return doc;
+            }
+        });
+        if (docObj && Object.keys(docObj).length > 0 && docObj.is_required) {
+            return "*";
+        } else if (typeof docObj === "string") {
+            return "*";
+        }
+        return ""
+    };
 
     useEffect(() => {
         getRFQListCall();
@@ -344,6 +372,7 @@ function BookPolicy({
         formData
         )
             .then(response => {
+                // FIXME change logic here to show PDF, when PDF closed take to list screen
                 toast.success(response.data.message, { autoClose: 4000 });
                 browserRedirect("/");
 
@@ -397,7 +426,7 @@ function BookPolicy({
     }
 
     useEffect(() => {
-        if (policyRequiredDocuments && Object.keys(policyRequiredDocuments).length > 0) {
+        if (policyRequiredDocuments) {
             if (!(state && state.required_documents && Object.keys(state.required_documents).length > 0)) {
                 // empty required_documents case
                 let tempObj = {};
@@ -425,7 +454,177 @@ function BookPolicy({
         }
     }, [policyRequiredDocuments]);
 
+    useEffect(() => {
+        if (policyRequiredDocumentsWithValidation && Object.keys(policyRequiredDocumentsWithValidation).length > 0) {
+            let requiredDocumentsWithValidationArray = [];
+            for (let ele of policyRequiredDocumentsWithValidation) {
+                if ((typeof ele === "object") && Object.keys(ele).length > 0 && ele.document && ele.is_required) {
+                    requiredDocumentsWithValidationArray.push(ele.document);
+                } else if (typeof ele === "string") {
+                    requiredDocumentsWithValidationArray.push(ele);
+                }
+            };
+            if (requiredDocumentsWithValidationArray && requiredDocumentsWithValidationArray.length > 0) {
+                if (state && state.required_documents && Object.keys(state.required_documents).length > 0) {
+                    let missingDocs = false;
+                    for (let ele of requiredDocumentsWithValidationArray) {
+                        if (!state.required_documents[ele]) {
+                            missingDocs = true;
+                        };
+                    };
+                    if (missingDocs) {
+                        setRequiredDocumentsError("Please upload all required documents (marked with *)")
+                    } else {
+                        setRequiredDocumentsError("");
+                    }
+                } else {
+                    setRequiredDocumentsError("Please upload all required documents (marked with *)");
+                }
+            } else {
+                setRequiredDocumentsError("");
+            }
+        } else {
+            setRequiredDocumentsError("");
+        }
+    }, [policyRequiredDocumentsWithValidation, state.required_documents]);
 
+    useEffect(() => {
+        if (isPrintable) {
+            const headerNavMenu = document.getElementById("page-nav");
+            const pbForm = document.getElementById("printable-form");
+            const pri = document.getElementById("ifmcontentstoprint").contentWindow;
+            console.log("headerNavMenu", headerNavMenu)
+
+            setTimeout(() => {
+                headerNavMenu.style.opacity = 0
+                pbForm.style.background = `linear-gradient( rgba(255,255,255,.96), rgba(255,255,255,.96)), url(${logo})`
+                pbForm.style.backgroundRepeat = `repeat`;
+                pbForm.style.backgroundSize = "100%"
+                pbForm.style.display = "block"
+                // window.print()
+                pri.document.open();
+                pri.document.write(headerNavMenu.innerHTML);
+                pri.document.write(pbForm.innerHTML);
+                pri.document.close();
+                pri.focus();
+                pri.print();
+                headerNavMenu.style.opacity = 100
+                pbForm.style.background = ``
+                pbForm.style.backgroundPosition = ``
+                pbForm.style.display = "none"
+                setIsPrintable(false)
+            }, 2000);
+        }
+    }, [isPrintable]);
+
+
+    const PrintableDetails = ({ currState }) => {
+
+        const [selectedRFQObject, setSelectedRFQObject] = useState({});
+
+        useEffect(() => {
+            if (RFQsList && Object.keys(RFQsList).length > 0) {
+                setSelectedRFQObject(RFQsList.find(x => x._id === currState.RFQ_id));
+            }
+        }, [currState.RFQ_id]);
+
+        return (
+            <div>
+                <h3>Policy Details-</h3>
+                <div>Name of Policyholder: {selectedRFQObject && selectedRFQObject.client_name}</div>
+                <div>Address of Policyholder:</div>
+                {/* FIXME add get company details API call */}
+                <div>Policy Number: {currState && currState.IAPN}</div>
+                <div>Contact Details of Policy Holder :</div>
+                <div>Phone/Mobile No.: {selectedRFQObject && selectedRFQObject.client_phone_number}</div>
+                <div>Email ID: {selectedRFQObject && selectedRFQObject.client_email_address}</div>
+                <div>{`Policy Period: From 00:01 Hrs on ${currState && currState.inception_date && dateFormatter(currState.inception_date)} To 23:59 Hrs on ${currState && currState.expiry_date && dateFormatter(currState.expiry_date)}`}</div>
+
+                <h3>Payment Details-</h3>
+                <div>
+                    <table border={"1px solid #EEEEEE"}>
+                        <tr>
+                            <th > Date </th>
+                            <th > Particulars </th>
+                            <th > Amount </th>
+                        </tr>
+                        <tr>
+                            <td style={{ padding: "10px" }}> {currState.payment_details.payment_demanded_on && dateFormatter(currState.payment_details.payment_demanded_on)} </td>
+                            <td style={{ padding: "10px" }}> Invoice Amount (from RFQ) </td>
+                            <td align="right" style={{ padding: "10px" }}> {Number(currState.payment_details.payment_demanded).toLocaleString('en-IN', {
+                                maximumFractionDigits: 2,
+                                style: 'currency',
+                                currency: 'INR'
+                            })} </td>
+                        </tr>
+                        <tr>
+                            <td style={{ padding: "10px" }}>
+                                {(currState.payment_details.payment_received_on && dateFormatter(currState.payment_details.payment_received_on)) || dateFormatter(new Date().toISOString())}
+                            </td>
+                            <td style={{ padding: "10px" }}> Total received amount </td>
+                            <td align="right" style={{ padding: "10px" }}>
+                                {Number(currState.payment_details.payment_received).toLocaleString('en-IN', {
+                                    maximumFractionDigits: 2,
+                                    style: 'currency',
+                                    currency: 'INR'
+                                })}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    {`Payment initiated: From A/C ${currState && currState.payment_details && currState.payment_details.payment_from_ac_number} of ${currState && currState.payment_details && currState.payment_details.payment_from_bank} Bank`}
+                </div>
+                <div>
+                    {`Payment received: To A/C ${currState && currState.payment_details && currState.payment_details.received_in_our_bank_ac_number} of ${currState && currState.payment_details && currState.payment_details.received_in_our_bank} Bank`}
+                </div>
+                <div>Payment stage: {currState && currState.stage ? stageList.find(x => x.key.toString() === currState.stage) && stageList.find(x => x.key.toString() === currState.stage).name : "N/A"}</div>
+                <div>Payment remarks: {currState && currState.payment_details && currState.payment_details.remarks}</div>
+            </div>
+
+        )
+    };
+
+    const PrintableDefinitions = ({ data }) => {
+        const [definitionsArray, setDefinitionsArray] = useState([]);
+
+        useEffect(() => {
+            if (data && Object.keys(data).length > 0) {
+                setDefinitionsArray(data);
+            }
+        }, []);
+
+        return (
+            <div style={{marginTop: "30px"}}>
+                <h3>Coverage Details-</h3>
+                {
+                    definitionsArray && Object.keys(definitionsArray).length > 0 ?
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="width-200px">Coverage Code</th>
+                                    <th>Coverage Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    definitionsArray.map((definition, index) =>
+                                        <tr>
+                                            <td>{definition && definition.key}</td>
+                                            <td>{definition && definition.value}</td>
+                                        </tr>
+                                    )
+                                }
+                            </tbody>
+                        </table>
+                        :
+                        <p>
+                            No definitions mentioned in the product, please contact insurer.
+                        </p>
+                }
+            </div>
+        )
+    };
 
     const marital_statuses = ["Unmarried", "Married", "Divorced without children", "Divorced with children"];
 
@@ -490,7 +689,7 @@ function BookPolicy({
                 <Grid xs={8} >
                     <Autocomplete
                         options={RFQsList}
-                        getOptionLabel={option => option.client_name}
+                        getOptionLabel={option => `${option.client_name}${option && option.quote_name ? " - " + option.quote_name : ""}`}
                         className="claim-inputs"
                         value={state.RFQ_id ? RFQsList.find(x => x._id === state.RFQ_id) : { _id: "", client_name: RFQText }}
                         onChange={(event, value) => {
@@ -922,14 +1121,14 @@ function BookPolicy({
                 }
             </Grid>
 
-            <h3>Required Documents:</h3>
+            <h3>Upload Documents:</h3>
             <Grid container>
                 {
                     state && state.required_documents && Object.keys(state.required_documents).length > 0 &&
                     Object.keys(state.required_documents).map(docKey =>
                         <>
                             <Grid xs={3} style={{ padding: "10px" }}>
-                                <div style={{ display: "inline-block" }}>{docKey.charAt(0).toUpperCase() + docKey.slice(1)} :</div>
+                                <div style={{ display: "inline-block" }}>{docKey.charAt(0).toUpperCase() + docKey.slice(1) + isDocRequired(docKey)} :</div>
                                 <br />
                                 <br />
                                 {
@@ -968,6 +1167,13 @@ function BookPolicy({
                         </>
                     )
                 }
+            </Grid>
+            <Grid container>
+                <Grid item xs={12} style={{ padding: "10px" }}>
+                    {requiredDocumentsError ?
+                        <div style={{ color: "red", fontSize: "12px", fontWeight: "bold", marginLeft: "20px" }}>{requiredDocumentsError}</div>
+                        : null}
+                </Grid>
             </Grid>
 
             <Dialog
@@ -1015,56 +1221,39 @@ function BookPolicy({
             </Dialog>
 
             <div>
-                {!state.IAPN ? 
-                <button
-                onClick={() => setState({
-                    ...state, IAPN: faker.random.alphaNumeric(16).toUpperCase()
-                    })}
-                >
-                    Generate IAPN
-                </button>
-                :
+                {!state.IAPN ?
+                    <button
+                        disabled={requiredDocumentsError ? true : false}
+                        onClick={() => setState({
+                            ...state, IAPN: faker.random.alphaNumeric(16).toUpperCase()
+                        })}
+                    >
+                        Generate IAPN
+                    </button>
+                    :
                     <div>
-                        <h3 style={{marginRight: "15px"}}>IAPN: </h3>
-                            <TextField
-                                // style={{ width: "100%" }}
-                                // label="IAPN"
-                                // variant="outlined"
-                                value={state.IAPN}
-                                onChange={(event) => {
-                                    // let temp = {...state.payment_details};
-                                    // temp.remarks = event.target.value;
-                                    setState({ ...state, IAPN: event.target.value })
-                                }}
-                            />
+                        <h3 style={{ marginRight: "15px" }}>IAPN: </h3>
+                        <TextField
+                            // style={{ width: "100%" }}
+                            // label="IAPN"
+                            // variant="outlined"
+                            value={state.IAPN}
+                            onChange={(event) => {
+                                // let temp = {...state.payment_details};
+                                // temp.remarks = event.target.value;
+                                setState({ ...state, IAPN: event.target.value })
+                            }}
+                        />
                     </div>}
             </div>
 
-            <Grid container spacing={3} style={{ position: "relative", marginBottom: "30px" }}>
-                {policyDefinitions && Object.keys(policyDefinitions).length > 0 && policyDefinitions.map((pd) => (
-                    pd.key.includes("EoB.") ?
-                        null
-                        :
-                        <Grid item xs={3}>
-                            <div className="flip-card">
-                                <div className="flip-content">
-                                    <div class="flip-front">
-                                        <p className="flip-front-content">{pd.key}</p>
-                                    </div>
-                                    <div class="flip-back">
-                                        <p className="flip-back-content">{pd.value}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </Grid>
-                ))}
-            </Grid>
+            <div><button onClick={() => setIsPrintable(true)}>Print Policy</button></div>
 
             <div>
                 {booking_id == "new" && 
                 <button
                     className="primary-button"
-                    disabled={!state.IAPN}
+                    disabled={(!state.IAPN || requiredDocumentsError) ? true : false}
                     onClick={() => {
                         // axios.post(urls.PREFIX + "subscription/new", state)
                         handleFormData(state, files);
@@ -1135,6 +1324,36 @@ function BookPolicy({
 
             </div>
 
+            <Grid container spacing={3} style={{ position: "relative", marginBottom: "30px" }}>
+                {policyDefinitions && Object.keys(policyDefinitions).length > 0 && policyDefinitions.map((pd) => (
+                    pd.key.includes("EoB.") ?
+                        null
+                        :
+                        <Grid item xs={3}>
+                            <div className="flip-card">
+                                <div className="flip-content">
+                                    <div class="flip-front">
+                                        <p className="flip-front-content">{pd.key}</p>
+                                    </div>
+                                    <div class="flip-back">
+                                        <p className="flip-back-content">{pd.value}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </Grid>
+                ))}
+            </Grid>
+
+            <iframe id="ifmcontentstoprint" style={{ height: "0px", width: "0px", position: "absolute" }}>
+            </iframe>
+
+            <div id="printable-form" style={{ display: "none" }}>
+                {state && state.RFQ_id &&
+                    <div style={{ marginTop: "30px" }}>
+                        <PrintableDetails currState={state} />
+                        <PrintableDefinitions data={policyDefinitions} />
+                    </div>}
+            </div>
         </div>
     );
 }
