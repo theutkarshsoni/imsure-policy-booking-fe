@@ -120,6 +120,9 @@ function BookPolicy({
     const [policyRequiredDocumentsWithValidation, setPolicyRequiredDocumentsWithValidation] = useState([]);
     const [requiredDocumentsError, setRequiredDocumentsError] = useState("");
     const [isPrintable, setIsPrintable] = useState(false);
+    const [redirectAfterPrintClose, setRedirectAfterPrintClose] = useState(false);
+
+    const stageList = [{ key: 1, name: "Confirmed" }, { key: 2, name: "Payment awaited" }, { key: 3, name: "Payment received" }, { key: 4, name: "Policy generated" }, { key: 5, name: "Enrollment open" }, { key: 6, name: "Enrollment started" }, { key: 7, name: "Enrollment in progress" }, { key: 8, name: "Enrollment closed" }, { key: 9, name: "Endorsement payment awaited" }, { key: 10, name: "New endorsements received and awaiting" }, { key: 11, name: "New endorsements processed" }, { key: 12, name: "Endorsement refund to be processed" }, { key: 13, name: "Endorsement refund processed" }];
 
     const routeParams = useParams();
     console.log("routeParams: ", routeParams);
@@ -367,6 +370,7 @@ function BookPolicy({
             formData.append(`${files[i].name}`, files[i].file, files[i].file.name)
             console.log(`form data ${files[i].name}`, formData.get(files[i].name));
         }
+        setRedirectAfterPrintClose(true);
 
         request(booking_id == "new" ? 'post' :'put', urls.PREFIX + "/pbs/" + booking_id,
         formData
@@ -374,7 +378,8 @@ function BookPolicy({
             .then(response => {
                 // FIXME change logic here to show PDF, when PDF closed take to list screen
                 toast.success(response.data.message, { autoClose: 4000 });
-                browserRedirect("/");
+                // browserRedirect("/");
+                setIsPrintable(true);
 
             })
             .catch(error => console.log(error))
@@ -513,14 +518,31 @@ function BookPolicy({
                 pbForm.style.backgroundPosition = ``
                 pbForm.style.display = "none"
                 setIsPrintable(false)
+                if (redirectAfterPrintClose) {
+                    setTimeout(() => {
+                        browserRedirect("/");
+                    }, 1000);
+                }
             }, 2000);
         }
     }, [isPrintable]);
 
 
-    const PrintableDetails = ({ currState }) => {
+    const PrintableDetails = ({ currState, stageList }) => {
 
         const [selectedRFQObject, setSelectedRFQObject] = useState({});
+        const [stageText, setStageText] = useState("");
+        
+        const getPaymentStageText = (currState, stageList) => {
+            // console.log("currState", currState);
+            if (currState && currState.stage) {
+                let stageObj = stageList.find(x => x.key.toString() == currState.stage);
+                if (stageObj && Object.keys(stageObj).length > 0 && stageObj.name) {
+                    return stageObj.name;
+                }
+            }
+            return "N/A"
+        };
 
         useEffect(() => {
             if (RFQsList && Object.keys(RFQsList).length > 0) {
@@ -528,17 +550,27 @@ function BookPolicy({
             }
         }, [currState.RFQ_id]);
 
+        useEffect(() => {
+            let paymentStageText = getPaymentStageText(currState, stageList);
+            setStageText(paymentStageText);
+        }, [currState && currState.stage]);
+
         return (
             <div>
                 <h3>Policy Details-</h3>
                 <div>Name of Policyholder: {selectedRFQObject && selectedRFQObject.client_name}</div>
-                <div>Address of Policyholder:</div>
-                {/* FIXME add get company details API call */}
+                <div>Address of Policyholder: {selectedRFQObject && selectedRFQObject.client_address}</div>
                 <div>Policy Number: {currState && currState.IAPN}</div>
                 <div>Contact Details of Policy Holder :</div>
                 <div>Phone/Mobile No.: {selectedRFQObject && selectedRFQObject.client_phone_number}</div>
                 <div>Email ID: {selectedRFQObject && selectedRFQObject.client_email_address}</div>
                 <div>{`Policy Period: From 00:01 Hrs on ${currState && currState.inception_date && dateFormatter(currState.inception_date)} To 23:59 Hrs on ${currState && currState.expiry_date && dateFormatter(currState.expiry_date)}`}</div>
+                <div>Sum Insured: {currState && currState.sum_insured && Number(currState.sum_insured).toLocaleString('en-IN', {
+                    maximumFractionDigits: 2,
+                    style: 'currency',
+                    currency: 'INR'
+                })}</div>
+                <div>Total Insured Person: {currState && currState.total_insured_person}</div>
 
                 <h3>Payment Details-</h3>
                 <div>
@@ -578,7 +610,7 @@ function BookPolicy({
                 <div>
                     {`Payment received: To A/C ${currState && currState.payment_details && currState.payment_details.received_in_our_bank_ac_number} of ${currState && currState.payment_details && currState.payment_details.received_in_our_bank} Bank`}
                 </div>
-                <div>Payment stage: {currState && currState.stage ? stageList.find(x => x.key.toString() === currState.stage) && stageList.find(x => x.key.toString() === currState.stage).name : "N/A"}</div>
+                <div>Payment stage: {stageText}</div>
                 <div>Payment remarks: {currState && currState.payment_details && currState.payment_details.remarks}</div>
             </div>
 
@@ -629,8 +661,6 @@ function BookPolicy({
     const marital_statuses = ["Unmarried", "Married", "Divorced without children", "Divorced with children"];
 
     const [loadFromTemplateOpen, setLoadFromTemplateOpen] = useState(false);
-
-    const stageList = [{ key: 1, name: "Confirmed" }, { key: 2, name: "Payment awaited" }, { key: 3, name: "Payment received" }, { key: 4, name: "Policy generated" }, { key: 5, name: "Enrollment open" }, { key: 6, name: "Enrollment started" }, { key: 7, name: "Enrollment in progress" }, { key: 8, name: "Enrollment closed" }, { key: 9, name: "Endorsement payment awaited" }, { key: 10, name: "New endorsements received and awaiting" }, { key: 11, name: "New endorsements processed" }, { key: 12, name: "Endorsement refund to be processed" }, { key: 13, name: "Endorsement refund processed" }];
 
     return (
         <div>
@@ -700,7 +730,9 @@ function BookPolicy({
                                 let temp = {...state.payment_details};
                                 temp.payment_demanded_on = new Date(value && value.updatedAt);
                                 temp.payment_demanded = value && value.premium && value.premium.total_payable;
-                                setState({ ...state, RFQ_id: value._id, payment_details: temp});
+                                let sum_insured = value && value.sum_insured || "";
+                                let total_insured_person = value && value.total_insured_person || "";
+                                setState({ ...state, RFQ_id: value._id, payment_details: temp, sum_insured, total_insured_person});
                                 getPolicyDefinitionsCall(value._id);
                                 getPolicyBasicDetailsCall(value._id);
                             }
@@ -1247,7 +1279,7 @@ function BookPolicy({
                     </div>}
             </div>
 
-            <div><button onClick={() => setIsPrintable(true)}>Print Policy</button></div>
+            <div>{booking_id != "new" ? <button onClick={() => setIsPrintable(true)}>Print Policy</button> : null}</div>
 
             <div>
                 {booking_id == "new" && 
@@ -1350,7 +1382,7 @@ function BookPolicy({
             <div id="printable-form" style={{ display: "none" }}>
                 {state && state.RFQ_id &&
                     <div style={{ marginTop: "30px" }}>
-                        <PrintableDetails currState={state} />
+                        <PrintableDetails currState={state} stageList={stageList} />
                         <PrintableDefinitions data={policyDefinitions} />
                     </div>}
             </div>
